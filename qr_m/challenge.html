@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>QR Massacre — Challenge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #020617;
+      --card: #020617;
+      --border: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #38bdf8;
+      --radius-lg: 16px;
+      --radius-full: 999px;
+      --shadow: 0 0 40px rgba(15,23,42,0.9);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #0b1120 0, #020617 50%, #000 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 32px 12px 40px;
+      color: var(--text);
+    }
+    .container { width: 100%; max-width: 900px; }
+    header {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    .title-block h1 {
+      font-size: 1.35rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: radial-gradient(circle, #38bdf8, #0ea5e9 40%, transparent 70%);
+      box-shadow:
+        0 0 12px rgba(56,189,248,0.9),
+        0 0 30px rgba(56,189,248,0.8);
+    }
+    .subtitle {
+      margin-top: 4px;
+      font-size: .9rem;
+      color: var(--muted);
+    }
+    .subtitle-ar {
+      margin-top: 2px;
+      font-size: .85rem;
+      color: var(--muted);
+      direction: rtl;
+      text-align: right;
+    }
+    .back-link {
+      font-size: .86rem;
+      text-decoration: none;
+      color: var(--accent);
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(148,163,184,0.4);
+      padding: 6px 12px;
+      background: rgba(15,23,42,.85);
+    }
+    .back-link:hover { border-color: var(--accent); }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 16px 16px 18px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .74rem;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(148,163,184,0.5);
+      background: rgba(15,23,42,0.9);
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+    h2 { font-size: 1.1rem; margin-bottom: 8px; }
+
+    .qr-wrapper {
+      border-radius: 14px;
+      border: 1px solid rgba(148,163,184,0.4);
+      padding: 10px;
+      background: radial-gradient(circle at top, #020617, #020617 60%, #000);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .qr-wrapper:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow:
+        0 0 0 1px rgba(15,23,42,0.9),
+        0 22px 45px rgba(8,47,73,0.95);
+    }
+    .qr-wrapper img {
+      max-width: 220px;
+      width: 100%;
+      height: auto;
+      background: white;
+      border-radius: 8px;
+    }
+    .qr-caption {
+      font-size: .8rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    .qr-caption strong { color: var(--accent); }
+    .hint-tap {
+      font-size: .78rem;
+      color: var(--muted);
+      margin-top: 4px;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .details {
+      display: none;
+      margin-top: 10px;
+      font-size: .9rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .details-ar {
+      direction: rtl;
+      text-align: right;
+      font-size: .86rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .start-btn {
+      margin-top: 10px;
+      border-radius: var(--radius-full);
+      border: none;
+      padding: 8px 16px;
+      font-size: .9rem;
+      cursor: pointer;
+      background: linear-gradient(135deg, #0ea5e9, #22c55e);
+      color: #0b1120;
+      font-weight: 600;
+    }
+    .start-btn:hover { filter: brightness(1.07); }
+
+    .error {
+      margin-top: 40px;
+      text-align: center;
+      color: #f97373;
+      font-size: .95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title-block">
+        <h1>
+          <span class="logo-dot"></span>
+          QR Massacre — Challenge
+        </h1>
+        <p class="subtitle">
+          Scan the QR, read the brief, then exploit the QR + SQLi idea behind this ID.
+        </p>
+        <p class="subtitle-ar">
+          امسح كود الـ QR، اقرأ وصف التحدّي، وبعدين جرّب تطبّق فكرة <strong>QR + SQLi</strong> المرتبطة برقم هذا التحدّي.
+        </p>
+      </div>
+      <a href="index.html" class="back-link">← Back to ideas list</a>
+    </header>
+
+    <main id="main"></main>
+  </div>
+
+  <script>
+    function getIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const id = parseInt(params.get("id"), 10);
+      if (Number.isNaN(id) || id < 1 || id > 50) return null;
+      return id;
+    }
+
+    const id = getIdFromUrl();
+    const mainEl = document.getElementById("main");
+
+    if (!id) {
+      mainEl.innerHTML = '<p class="error">Invalid or missing challenge id. Use a QR from the main page.</p>';
+    } else {
+      const padded = String(id).padStart(2, "0");
+
+      const html = `
+        <section class="card">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            Challenge #${id}
+          </div>
+          <h2>QR + SQLi Idea #${id}</h2>
+          <div class="qr-wrapper" id="qrBox">
+            <img src="qr/QR_${padded}.png" alt="QR code for challenge ${id}" />
+            <div class="qr-caption">
+              Scan this QR with your phone to open the entry URL for this challenge. <br/>
+              <strong>Click the QR</strong> to reveal the mission details.
+            </div>
+            <div class="hint-tap">
+              اضغط على صورة الـ QR عشان تشوف وصف التحدّي وكيف تبدأ 👇
+            </div>
+          </div>
+          <div class="details" id="details">
+            <p>
+              This challenge is based on idea <strong>#${id}</strong> from the main QR + SQLi ideas page.
+              Use the QR to get the starting URL, then look for a parameter you can inject into a SQL query (e.g. <code>id</code>, <code>name</code>, <code>page</code>, <code>token</code>).
+            </p>
+            <p class="details-ar">
+              هذا التحدّي مبني على الفكرة رقم <strong>#${id}</strong> من صفحة الأفكار الرئيسية.  
+              امسح الـ QR، افتح الرابط، ودوّر على أي بارامتر ممكن يكون قابل للحقن في استعلام SQL
+              (زي <code>id</code> أو <code>name</code> أو <code>page</code> أو <code>token</code>… إلخ).
+            </p>
+            <button class="start-btn">
+              Start the challenge
+            </button>
+          </div>
+        </section>
+      `;
+
+      mainEl.innerHTML = html;
+
+      const qrBox = document.getElementById("qrBox");
+      const details = document.getElementById("details");
+      qrBox.addEventListener("click", () => {
+        details.style.display = details.style.display === "block" ? "none" : "block";
+      });
+    }
+  </script>
+</body>
+</html>
