@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>QR + SQLi CTF Ideas Library</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-elevated: #020617;
+      --bg-card: #020617;
+      --border-subtle: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.12);
+      --danger: #f97373;
+      --radius-lg: 14px;
+      --radius-full: 999px;
+      --shadow-soft: 0 0 35px rgba(15, 23, 42, 0.85);
+      --shadow-card: 0 18px 45px rgba(15, 23, 42, 0.95);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: radial-gradient(circle at top, #0b1120 0, #020617 52%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 32px 16px 48px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1180px;
+    }
+
+    header {
+      margin-bottom: 28px;
+      padding: 20px 22px 22px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #020617cc, #020617f7);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: var(--shadow-soft);
+      position: sticky;
+      top: 12px;
+      backdrop-filter: blur(14px);
+      z-index: 10;
+    }
+
+    .headline-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.55rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h1 span.logo-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: radial-gradient(circle, #38bdf8, #0ea5e9 40%, transparent 70%);
+      box-shadow:
+        0 0 12px rgba(56, 189, 248, 0.9),
+        0 0 30px rgba(56, 189, 248, 0.8);
+    }
+
+    .subtitle {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      line-height: 1.5;
+    }
+
+    .subtitle strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .subtitle-ar {
+      margin-top: 4px;
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      direction: rtl;
+      text-align: right;
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 6px 14px;
+      font-size: 0.84rem;
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.16s ease;
+    }
+
+    .filter-btn span.dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.7);
+    }
+
+    .filter-btn[data-filter="beginner"] span.dot {
+      background: #22c55e;
+    }
+
+    .filter-btn[data-filter="intermediate"] span.dot {
+      background: #eab308;
+    }
+
+    .filter-btn[data-filter="advanced"] span.dot {
+      background: #f97316;
+    }
+
+    .filter-btn[data-filter="expert"] span.dot {
+      background: #ef4444;
+    }
+
+    .filter-btn.active {
+      border-color: var(--accent);
+      background: radial-gradient(circle at top left, #0f172a, #020617 55%, #000);
+      box-shadow:
+        0 0 0 1px rgba(56, 189, 248, 0.2),
+        0 0 25px rgba(8, 47, 73, 0.9);
+      color: var(--accent);
+    }
+
+    .search-wrapper {
+      margin-left: auto;
+      position: relative;
+      min-width: 220px;
+      max-width: 280px;
+      flex: 1 1 220px;
+    }
+
+    .search-input {
+      width: 100%;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 7px 30px 7px 12px;
+      font-size: 0.86rem;
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.16s ease;
+    }
+
+    .search-input::placeholder {
+      color: rgba(148, 163, 184, 0.7);
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow:
+        0 0 0 1px rgba(56, 189, 248, 0.2),
+        0 0 18px rgba(15, 23, 42, 0.9);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      color: rgba(148, 163, 184, 0.8);
+    }
+
+    .tagline {
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .tagline span {
+      color: var(--accent);
+    }
+
+    main {
+      margin-top: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .challenge-card {
+      background: radial-gradient(circle at top, #020617, #020617 52%, #020617);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(31, 41, 55, 0.95);
+      padding: 14px 14px 13px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.18s ease, box-shadow 0.18s ease,
+        border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .challenge-card::before {
+      content: "";
+      position: absolute;
+      inset: -120px;
+      background: conic-gradient(
+        from 210deg,
+        transparent 0,
+        rgba(56, 189, 248, 0.16) 12%,
+        transparent 32%,
+        transparent 60%,
+        rgba(56, 189, 248, 0.14) 72%,
+        transparent 90%
+      );
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+
+    .challenge-card:hover::before {
+      opacity: 1;
+    }
+
+    .challenge-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(56, 189, 248, 0.7);
+      box-shadow:
+        0 0 0 1px rgba(15, 23, 42, 0.9),
+        0 24px 55px rgba(8, 47, 73, 0.95);
+      background: radial-gradient(
+        circle at top,
+        #020617,
+        #020617 48%,
+        #020617
+      );
+    }
+
+    .badge-level {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      padding: 4px 9px;
+      border-radius: var(--radius-full);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge-pill {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #64748b;
+    }
+
+    .challenge-card[data-level="beginner"] .badge-pill {
+      background: #22c55e;
+    }
+
+    .challenge-card[data-level="intermediate"] .badge-pill {
+      background: #eab308;
+    }
+
+    .challenge-card[data-level="advanced"] .badge-pill {
+      background: #fb923c;
+    }
+
+    .challenge-card[data-level="expert"] .badge-pill {
+      background: #f97373;
+    }
+
+    .challenge-title {
+      font-size: 0.98rem;
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .challenge-title span.id {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
+        Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: var(--accent);
+      font-size: 0.86rem;
+      margin-right: 4px;
+    }
+
+    .summary {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      margin-bottom: 7px;
+      line-height: 1.45;
+      position: relative;
+      z-index: 1;
+    }
+
+    .summary-ar {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 7px;
+      direction: rtl;
+      text-align: right;
+      position: relative;
+      z-index: 1;
+    }
+
+    .meta-list {
+      list-style: none;
+      font-size: 0.78rem;
+      color: rgba(148, 163, 184, 0.94);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .meta-list strong {
+      color: #cbd5f5;
+      font-weight: 600;
+    }
+
+    .hint {
+      margin-top: 5px;
+      font-size: 0.76rem;
+      color: rgba(148, 163, 184, 0.9);
+      font-style: italic;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hint span {
+      color: var(--accent);
+    }
+
+    .empty-state {
+      margin-top: 40px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .empty-state span {
+      color: var(--accent);
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 16px 14px 16px;
+      }
+      .headline-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      h1 {
+        font-size: 1.32rem;
+      }
+      .subtitle {
+        font-size: 0.86rem;
+      }
+      .controls-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-wrapper {
+        margin-left: 0;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="headline-row">
+        <div>
+          <h1>
+            <span class="logo-dot"></span>
+            QR + SQLi CTF Ideas Library
+          </h1>
+          <p class="subtitle">
+            50 <strong>educational</strong> QR-based SQL Injection challenge ideas,
+            organized by difficulty. Designed for <strong>CTF & training only</strong> —
+            never for attacking real systems.
+          </p>
+          <p class="subtitle-ar">
+            مكتبة تحتوي على <strong>٥٠ فكرة تحدّي</strong> تربط بين QR و SQLi
+            بمستويات مختلفة، للاستخدام في مسابقات CTF والتعلّم فقط.
+          </p>
+        </div>
+      </div>
+      <div class="controls-row">
+        <div class="filters">
+          <button class="filter-btn active" data-filter="all">
+            <span class="dot"></span>
+            All levels
+          </button>
+          <button class="filter-btn" data-filter="beginner">
+            <span class="dot"></span>
+            Beginner
+          </button>
+          <button class="filter-btn" data-filter="intermediate">
+            <span class="dot"></span>
+            Intermediate
+          </button>
+          <button class="filter-btn" data-filter="advanced">
+            <span class="dot"></span>
+            Advanced
+          </button>
+          <button class="filter-btn" data-filter="expert">
+            <span class="dot"></span>
+            Expert
+          </button>
+        </div>
+        <div class="search-wrapper">
+          <input
+            type="text"
+            id="search"
+            class="search-input"
+            placeholder="Search by idea, QR type, or concept…"
+          />
+          <span class="search-icon">🔍</span>
+        </div>
+      </div>
+      <p class="tagline">
+        Tip: search for keywords like <span>Base64</span>, <span>JSON</span>,
+        <span>Blind</span>, <span>Login</span>, <span>WAF</span>, etc.
+      </p>
+    </header>
+
+    <main>
+      <div class="grid" id="challengeGrid">
+        <!-- ========== BEGINNER (1–10) ========== -->
+        <div class="challenge-card" data-level="beginner">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Beginner · Classic ID
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#01</span> Simple ID parameter from QR
+          </h3>
+          <p class="summary">
+            QR holds a direct URL like <code>/profile.php?id=7</code>. The
+            server uses the <code>id</code> directly in a SQL query without
+            sanitization.
+          </p>
+          <p class="summary-ar">
+            كود QR يحتوي رابط مباشر فيه <code>id</code>، والباك-إند يستخدمه
+            في استعلام SQL بدون تعقيم.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Plain URL with numeric ID</li>
+            <li><strong>Core Idea:</strong> Basic GET parameter SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Player edits the <code>id</code> value in the URL to break or
+            abuse the query.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="beginner">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Beginner · Text wrapper
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#02</span> URL hidden inside text
+          </h3>
+          <p class="summary">
+            QR encodes a short message that includes a URL, e.g.
+            “Scan result: http://host/profile.php?id=3”.
+          </p>
+          <p class="summary-ar">
+            QR يعطي نص عادي فيه رابط وسط الكلام، اللاعب لازم يطلّع الرابط
+            بنفسه ثم يستغل الـ SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Human-readable text with URL</li>
+            <li><strong>Core Idea:</strong> Recognize URL then exploit SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Not every QR is only a URL — read the whole decoded text.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="beginner">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Beginner · Base64 URL
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#03</span> Base64-encoded URL
+          </h3>
+          <p class="summary">
+            QR contains a Base64 string that decodes to
+            <code>/profile.php?id=7</code>.
+          </p>
+          <p class="summary-ar">
+            محتوى الـ QR عبارة عن Base64، بعد فكّه يظهر رابط فيه
+            <code>id</code> قابل للحقن.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Base64 text</li>
+            <li><strong>Core Idea:</strong> Decode then try SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: “Looks random?” → probably encoding, not encryption.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="beginner">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Beginner · Typo path
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#04</span> Broken path in QR
+          </h3>
+          <p class="summary">
+            QR points to <code>/pr0file?id=7</code> (typo). Player must correct
+            it to <code>/profile.php?id=7</code> then use SQLi.
+          </p>
+          <p class="summary-ar">
+            الرابط في الـ QR فيه خطأ بسيط، لازم اللاعب يعدّل المسار قبل ما
+            يبلّش تجربة SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Mistyped URL</li>
+            <li><strong>Core Idea:</strong> Recon + simple bug fixing</li>
+          </ul>
+          <p class="hint">
+            Hint: 404 pages can contain clues about the correct route.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="beginner">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Beginner · Wrong ID
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#05</span> Non-existing user ID
+          </h3>
+          <p class="summary">
+            QR uses <code>id=999</code> that returns “user not found”. Flag
+            lives on a different ID.
+          </p>
+          <p class="summary-ar">
+            الـ ID الموجود في الـ QR مش موجود في الداتابيس، اللاعب لازم
+            يكتشف IDs ثانية باستخدام SQLi بسيطة.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL with invalid user id</li>
+            <li><strong>Core Idea:</strong> Enumerate IDs via SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Try conditions that can change the “user not found” behavior.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="beginner">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Beginner · Hex token
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#06</span> Hex token converted to ID
+          </h3>
+          <p class="summary">
+            QR contains <code>?token=0x7</code> and the backend converts it to
+            an integer ID without validation.
+          </p>
+          <p class="summary-ar">
+            الـ QR يعطي <code>token</code> بصيغة hex يتحول لـ ID داخل
+            الاستعلام، بدون أي تعقيم.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL with hex token</li>
+            <li><strong>Core Idea:</strong> Abuse token → SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Treat <code>token</code> as if it were the raw ID parameter.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="beginner">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Beginner · Login link
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#07</span> QR to login page
+          </h3>
+          <p class="summary">
+            QR leads to <code>/login.php</code>. The username field is
+            vulnerable to SQLi.
+          </p>
+          <p class="summary-ar">
+            كود QR يفتح صفحة تسجيل دخول بسيطة، فيها حقل مستخدم معرض لحقن SQL
+            يسمح بتجاوز الدخول.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL to /login.php</li>
+            <li><strong>Core Idea:</strong> SQLi login bypass</li>
+          </ul>
+          <p class="hint">
+            Hint: Classic “logic bypass” using crafted username input.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="beginner">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Beginner · Form entry
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#08</span> Code from QR → ID form
+          </h3>
+          <p class="summary">
+            QR only contains the number <code>7</code>. Site asks to “enter the
+            code from QR” into an ID field used in SQL.
+          </p>
+          <p class="summary-ar">
+            الـ QR يعطي رقم فقط، والموقع يطلب إدخاله في فورم، ثم يستخدمه في
+            استعلام SQL غير آمن.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Plain numeric code</li>
+            <li><strong>Core Idea:</strong> SQLi via POSTed ID</li>
+          </ul>
+          <p class="hint">
+            Hint: Even if the user types it, it’s still user input.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="beginner">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Beginner · User field
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#09</span> Username lookup via QR
+          </h3>
+          <p class="summary">
+            QR points to <code>/user.php?name=guest</code>. The
+            <code>name</code> string goes directly into a SQL query.
+          </p>
+          <p class="summary-ar">
+            QR يحتوي بارامتر <code>name</code> نصّي، ويستخدم مباشرة في WHERE
+            بدون أي تعقيم.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL with name parameter</li>
+            <li><strong>Core Idea:</strong> String-based SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Try breaking the quote context around <code>name</code>.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="beginner">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Beginner · Multi-language
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#10</span> Language switch + ID
+          </h3>
+          <p class="summary">
+            QR uses <code>/profile.php?id=7&lang=ar</code>. Only
+            <code>id</code> is vulnerable, but the extra parameter distracts.
+          </p>
+          <p class="summary-ar">
+            الرابط فيه أكثر من بارامتر (id + lang) واللاعب لازم يركز على
+            البارامتر المعرض للحقن فقط.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL with multiple params</li>
+            <li><strong>Core Idea:</strong> Noise + simple SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Not all parameters are interesting — test them one by one.
+          </p>
+        </div>
+
+        <!-- ========== INTERMEDIATE (11–20) ========== -->
+        <div class="challenge-card" data-level="intermediate">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Intermediate · JSON body
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#11</span> QR → JSON API with ID
+          </h3>
+          <p class="summary">
+            QR shows an endpoint <code>/api/user</code>. Player must send JSON
+            with <code>{"id": "7"}</code> that is injected into SQL.
+          </p>
+          <p class="summary-ar">
+            QR يعطي عنوان API، والباك-إند يأخذ <code>id</code> من JSON مباشرة
+            في استعلام SQL.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL to JSON API</li>
+            <li><strong>Core Idea:</strong> SQLi via JSON field</li>
+          </ul>
+          <p class="hint">
+            Hint: Intercept and edit JSON body (e.g., with a proxy).
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="intermediate">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Intermediate · JSON list
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#12</span> Find flag user in JSON list
+          </h3>
+          <p class="summary">
+            QR leads to <code>/api/search</code> where <code>q</code> from JSON
+            is used in a SQL LIKE clause.
+          </p>
+          <p class="summary-ar">
+            حقل <code>q</code> في JSON يستخدم داخل LIKE في الاستعلام، ويمكن
+            حقنه لاسترجاع صف الـ flag.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL to search API</li>
+            <li><strong>Core Idea:</strong> SQLi inside LIKE</li>
+          </ul>
+          <p class="hint">
+            Hint: Pay attention to quotes around the search pattern.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="intermediate">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Intermediate · API profile
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#13</span> QR to JSON profile API
+          </h3>
+          <p class="summary">
+            QR: <code>/api/profile?id=7</code>. Response is JSON containing the
+            password field with the flag, reachable via SQLi.
+          </p>
+          <p class="summary-ar">
+            الفلاج موجود في حقل JSON يتم استرجاعه عن طريق استعلام SQL قابل
+            للحقن من بارامتر <code>id</code>.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> API URL with ID</li>
+            <li><strong>Core Idea:</strong> Extract flag via SQLi in API</li>
+          </ul>
+          <p class="hint">
+            Hint: JSON API can leak more structured data than HTML pages.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="intermediate">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Intermediate · XOR ID
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#14</span> XOR-based ID decoding
+          </h3>
+          <p class="summary">
+            QR includes <code>?key=21&data=18</code>. Backend XORs them to get
+            the ID used in SQL without sanitation.
+          </p>
+          <p class="summary-ar">
+            السيرفر يحسب ID عن طريق XOR لقيمتين من الـ QR، ويمكن التلاعب بها
+            لعمل SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Two numeric fields</li>
+            <li><strong>Core Idea:</strong> Understand XOR → inject</li>
+          </ul>
+          <p class="hint">
+            Hint: Once you control the computed ID, you control the query.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="intermediate">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Intermediate · Blind length
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#15</span> Simple blind SQLi via length
+          </h3>
+          <p class="summary">
+            QR: <code>/profile.php?id=1</code>. Page only says “OK” or
+            “Not found” depending on SQL condition.
+          </p>
+          <p class="summary-ar">
+            الاستجابة لا تعرض البيانات، فقط نجاح أو فشل، واللاعب يستخدم
+            SQLi بلّايند لاستخراج أحرف الفلاج.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Basic profile URL</li>
+            <li><strong>Core Idea:</strong> Boolean-based blind SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Change the condition to ask true/false questions about data.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="intermediate">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Intermediate · Time-based
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#16</span> Time-based blind SQLi
+          </h3>
+          <p class="summary">
+            QR leads to a page that always shows the same text, but delays if a
+            SQL condition is true.
+          </p>
+          <p class="summary-ar">
+            زمن الاستجابة (delay) هو الدليل الوحيد لنتيجة الشرط داخل
+            الاستعلام، واللاعب يستخدمه لاستخراج الفلاج حرفًا حرفًا.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Uniform-looking response</li>
+            <li><strong>Core Idea:</strong> Time-based blind SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Measure response time carefully for each crafted input.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="intermediate">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Intermediate · Pagination
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#17</span> Vulnerable page parameter
+          </h3>
+          <p class="summary">
+            QR: <code>/list.php?page=1</code>. <code>page</code> is used in a
+            LIMIT/OFFSET clause and concatenated into SQL.
+          </p>
+          <p class="summary-ar">
+            بارامتر <code>page</code> يُستخدم مباشرة داخل LIMIT/OFFSET،
+            مما يسمح بحقن SQL.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> List URL with page param</li>
+            <li><strong>Core Idea:</strong> SQLi via LIMIT/OFFSET</li>
+          </ul>
+          <p class="hint">
+            Hint: Numeric parameters can still be dangerous if unvalidated.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="intermediate">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Intermediate · Search box
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#18</span> Search endpoint from QR
+          </h3>
+          <p class="summary">
+            QR: <code>/search.php</code>. QR text says “Search for: guest”.
+            The search term flows into SQL LIKE.
+          </p>
+          <p class="summary-ar">
+            التحدي يوجّه اللاعب لاستخدام قيمة معيّنة في خانة بحث، وهذه القيمة
+            تستخدم داخل LIKE في الاستعلام بدون تعقيم.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL + suggested keyword</li>
+            <li><strong>Core Idea:</strong> Inject via search</li>
+          </ul>
+          <p class="hint">
+            Hint: Play with wildcard and quote behavior in the search.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="intermediate">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Intermediate · Two-step
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#19</span> QR → hint → vulnerable endpoint
+          </h3>
+          <p class="summary">
+            First QR goes to a hint page that mentions
+            <code>/profile.php</code>. Only manual discovery reveals the
+            vulnerable <code>?id=</code>.
+          </p>
+          <p class="summary-ar">
+            أول صفحة مجرد hint عام، وعلى اللاعب أنه يكشف الـ endpoint الحقيقي
+            ويحاول SQLi عليه.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL to hint page</li>
+            <li><strong>Core Idea:</strong> Light recon + SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: View source, check links, discover hidden parameters.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="intermediate">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Intermediate · Multi-table
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#20</span> QR to orders / users join
+          </h3>
+          <p class="summary">
+            QR gets you to <code>/order.php?id=7</code>. Query joins
+            <code>orders</code> and <code>users</code>, and flag is in the
+            joined table.
+          </p>
+          <p class="summary-ar">
+            الاستعلام فيه JOIN بين جدولين، واللاعب يستخدم SQLi لاسترجاع
+            بيانات من الجدول الثاني (فيه الفلاج).
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL with order id</li>
+            <li><strong>Core Idea:</strong> SQLi across joined tables</li>
+          </ul>
+          <p class="hint">
+            Hint: Try to pivot the query to another table in the join.
+          </p>
+        </div>
+
+        <!-- ========== ADVANCED (21–35) ========== -->
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · Stego lead
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#21</span> QR → image with hidden URL
+          </h3>
+          <p class="summary">
+            QR links to a PNG image. The true vulnerable URL is hidden in the
+            image using simple steganography or metadata.
+          </p>
+          <p class="summary-ar">
+            QR يحوّل اللاعب لصورة، داخلها أو في الميتاداتا رابط الـ endpoint
+            المعرض لـ SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL to PNG</li>
+            <li><strong>Core Idea:</strong> Stego then SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Inspect EXIF/metadata or use basic stego tools.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · Short URL
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#22</span> Short URL expansion
+          </h3>
+          <p class="summary">
+            QR encodes a shortened URL. After expansion, it becomes a vulnerable
+            profile endpoint.
+          </p>
+          <p class="summary-ar">
+            محتوى الـ QR عبارة عن رابط مختصر، لازم يتوسّع أولاً ثم يبدأ
+            استغلال SQLi على الرابط الحقيقي.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Shortened link</li>
+            <li><strong>Core Idea:</strong> Link expansion + SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Use curl or browser devtools to see the final destination.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · JS-built URL
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#23</span> JavaScript builds vulnerable request
+          </h3>
+          <p class="summary">
+            QR → <code>/scan</code>. The page uses JavaScript to build
+            <code>/profile?id=7</code> from an encoded value.
+          </p>
+          <p class="summary-ar">
+            الرابط الحساس يتكوّن داخل JavaScript، اللاعب لازم يقرأ الكود ويفهم
+            كيف يغيّر القيمة للوصول لـ SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL to JS-heavy page</li>
+            <li><strong>Core Idea:</strong> Reverse JS, then inject</li>
+          </ul>
+          <p class="hint">
+            Hint: Pretty-print JS and search for <code>fetch</code> or
+            <code>XMLHttpRequest</code>.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · XML
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#24</span> XML body with injectable id
+          </h3>
+          <p class="summary">
+            QR gives a data URI that decodes to XML like
+            <code>&lt;user id="7"/&gt;</code>. The backend parses it and uses
+            the attribute in SQL.
+          </p>
+          <p class="summary-ar">
+            السيرفر يستقبل XML من QR، ويحصل على <code>id</code> من الـ attribute
+            ثم يضعه مباشرة في استعلام SQL.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> XML (direct or base64)</li>
+            <li><strong>Core Idea:</strong> SQLi through XML parsing</li>
+          </ul>
+          <p class="hint">
+            Hint: XML attributes can hold the same dangerous input as URL params.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · CSV import
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#25</span> QR → CSV upload with SQL import
+          </h3>
+          <p class="summary">
+            QR leads to an “import” page that reads IDs from CSV and directly
+            concatenates them into SQL.
+          </p>
+          <p class="summary-ar">
+            صفحة استيراد CSV تأخذ الـ IDs من الملف وتبني استعلام SQL يدويًا،
+            مما يسمح بحقن متقدّم عبر الملف.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL to CSV import page</li>
+            <li><strong>Core Idea:</strong> SQLi via file content</li>
+          </ul>
+          <p class="hint">
+            Hint: Remember that file content is still untrusted input.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · WAF bypass
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#26</span> Simple WAF blocking obvious patterns
+          </h3>
+          <p class="summary">
+            QR: <code>/profile?id=7</code>. Backend blocks certain keywords
+            (like “UNION”), but allows obfuscated payloads.
+          </p>
+          <p class="summary-ar">
+            يوجد فلتر بسيط يمنع كلمات محددة في الإدخال، والتحدي أن اللاعب
+            يجاوز الفلتر ويعمل SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Normal profile URL</li>
+            <li><strong>Core Idea:</strong> WAF bypass techniques</li>
+          </ul>
+          <p class="hint">
+            Hint: Play with comments, case changes, and keyword splitting.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · Two QRs
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#27</span> Double-QR challenge
+          </h3>
+          <p class="summary">
+            First QR leads to a page that displays a second QR image. The
+            second one has the real vulnerable URL.
+          </p>
+          <p class="summary-ar">
+            أول QR مجرد خطوة للوصول لثاني QR، والثاني فيه رابط الـ endpoint
+            المعرض للـ SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Two-stage QR flow</li>
+            <li><strong>Core Idea:</strong> Multi-step recon + SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Emphasize chain-of-custody from QR1 → QR2 → DB.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · ROT13
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#28</span> ROT13 encoded path
+          </h3>
+          <p class="summary">
+            QR encodes something like <code>cebsgvy.php?vq=7</code>, which is
+            ROT13 of <code>profile.php?id=7</code>.
+          </p>
+          <p class="summary-ar">
+            المسار مشفّر بطريقة ROT13 وبمجرد فكّه تحصل على رابط الـ SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> ROT13 text</li>
+            <li><strong>Core Idea:</strong> Decode → inject</li>
+          </ul>
+          <p class="hint">
+            Hint: Look for repeating patterns / obvious classical ciphers.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · Morse
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#29</span> Morse encoded number
+          </h3>
+          <p class="summary">
+            QR content is Morse code that decodes to an ID or endpoint name,
+            eventually leading to SQLi.
+          </p>
+          <p class="summary-ar">
+            محتوى الـ QR شيفرة مورس لمعرف أو اسم سكربت، بعد فكّه تبدأ مرحلة
+            استغلال SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Morse code</li>
+            <li><strong>Core Idea:</strong> Decode layer → SQL layer</li>
+          </ul>
+          <p class="hint">
+            Hint: This is more OSINT/crypto + web exploitation combined.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · WiFi portal
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#30</span> WiFi QR → captive portal with SQLi
+          </h3>
+          <p class="summary">
+            QR is a WiFi config. After connecting, captive portal shows a form
+            that uses input in a SQL query.
+          </p>
+          <p class="summary-ar">
+            QR يضبط اتصال WiFi، وبعد الاتصال يظهر Portal تسجيل أو فورم فيه SQLi
+            قابلة للاستغلال.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> WiFi configuration</li>
+            <li><strong>Core Idea:</strong> Network step + SQLi on portal</li>
+          </ul>
+          <p class="hint">
+            Hint: The “network” part is just flavor; real bug is in the form.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · Geo QR
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#31</span> Geolocation hint
+          </h3>
+          <p class="summary">
+            QR is a geo URI. Site later uses latitude/longitude as parameters in
+            a SQL query.
+          </p>
+          <p class="summary-ar">
+            الإحداثيات المستخرجة من الـ QR تستخدم كـ input في استعلام SQL، مع
+            إمكانية حقنها.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> geo: URI</li>
+            <li><strong>Core Idea:</strong> Untrusted coordinates → SQL</li>
+          </ul>
+          <p class="hint">
+            Hint: Show that any “trusted” derived value should still be validated.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · Invite code
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#32</span> QR invite → vulnerable dashboard
+          </h3>
+          <p class="summary">
+            QR encodes an invite code that logs the user into a dashboard where
+            filters are vulnerable to SQLi.
+          </p>
+          <p class="summary-ar">
+            QR يعطي كود دخول لدashboard، وفيها فلتر أو جدول يستخدم قيم
+            المستخدم داخل استعلام SQL غير آمن.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Invite token</li>
+            <li><strong>Core Idea:</strong> Auth step → SQLi in filter</li>
+          </ul>
+          <p class="hint">
+            Hint: Once inside, test all list/search/filter parameters.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · Mobile-only
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#33</span> Mobile user-agent behavior
+          </h3>
+          <p class="summary">
+            QR site behaves differently for mobile user agents and exposes a
+            vulnerable parameter only on mobile.
+          </p>
+          <p class="summary-ar">
+            الموقع يكشف بارامتر إضافي أو سلوك مختلف عند الفتح من جوال، وهذا
+            البارامتر فيه SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL with UA-based behavior</li>
+            <li><strong>Core Idea:</strong> UA trick + SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Change user-agent or use mobile device to see extra features.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · Session-based
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#34</span> QR sets session then SQLi
+          </h3>
+          <p class="summary">
+            QR sets a session cookie via a first endpoint. Second endpoint reads
+            session value and concatenates into SQL.
+          </p>
+          <p class="summary-ar">
+            قيمة من الـ QR تخزَّن في Session، ثم تُستخدم لاحقًا في استعلام SQL
+            بدون تعقيم.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL that writes session</li>
+            <li><strong>Core Idea:</strong> Indirect SQLi via session data</li>
+          </ul>
+          <p class="hint">
+            Hint: Session values still originate from user input.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="advanced">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Advanced · Multi-DB
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#35</span> QR chooses database
+          </h3>
+          <p class="summary">
+            QR includes a <code>db</code> parameter used to pick a schema.
+            Improper handling leads to cross-database SQLi.
+          </p>
+          <p class="summary-ar">
+            بارامتر من الـ QR يحدد أي قاعدة بيانات أو schema تُستخدم، ويمكن
+            التلاعب به للوصول لبيانات حساسة.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL with db selector</li>
+            <li><strong>Core Idea:</strong> Abuse dynamic DB selection</li>
+          </ul>
+          <p class="hint">
+            Hint: Dynamic schema names must never be directly concatenated.
+          </p>
+        </div>
+
+        <!-- ========== EXPERT (36–50) ========== -->
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · Signed link
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#36</span> QR with signed ID & weak check
+          </h3>
+          <p class="summary">
+            QR: <code>/view?id=7&sig=...</code>. Signature is checked
+            incorrectly, allowing SQLi via <code>id</code>.
+          </p>
+          <p class="summary-ar">
+            الرابط “موقّع” ظاهريًا، لكن التحقق من التوقيع ضعيف أو غير كامل،
+            فيمكن تجاوز الحماية والقيام بـ SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Signed URL</li>
+            <li><strong>Core Idea:</strong> Break signature assumption + SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Look for logic bugs in the way signature is computed/checked.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · JWT embedded
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#37</span> QR with JWT → DB lookup
+          </h3>
+          <p class="summary">
+            QR holds a JWT. Backend reads a claim (e.g., user ID) and uses it in
+            a SQL query without validation.
+          </p>
+          <p class="summary-ar">
+            قيمة داخل JWT تُستخدم كـ ID في استعلام SQL، ويمكن التلاعب بالـ JWT
+            في ظروف معينة للوصول إلى SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> JWT token</li>
+            <li><strong>Core Idea:</strong> Token tampering → SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Combine auth token weaknesses with injection.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · Second-order
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#38</span> Second-order SQLi via QR
+          </h3>
+          <p class="summary">
+            First, QR saves some data in the database. Later, another feature
+            reads it and concatenates into SQL.
+          </p>
+          <p class="summary-ar">
+            SQLi لا تحدث مباشرة، بل بعد تخزين قيمة من QR في الداتابيس
+            واستخدامها لاحقًا في استعلام آخر.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL to “save” endpoint</li>
+            <li><strong>Core Idea:</strong> Second-order injection</li>
+          </ul>
+          <p class="hint">
+            Hint: Think about “where does this value go later?”.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · UNION-heavy
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#39</span> Multi-column UNION challenge
+          </h3>
+          <p class="summary">
+            QR points to a complex report with many columns. Exploitation
+            requires careful UNION-based SQLi with matching column counts.
+          </p>
+          <p class="summary-ar">
+            تقرير معقّد بعدة أعمدة، ولا يمكن استخراج الفلاج إلا بـ UNION
+            مضبوط من ناحية عدد وترتيب الأعمدة.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL to multi-column report</li>
+            <li><strong>Core Idea:</strong> Advanced UNION SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Use order-by / null padding to find correct column structure.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · Read-only DB
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#40</span> Read-only DB, flag in view
+          </h3>
+          <p class="summary">
+            QR site uses a read-only DB account. Flag lives in a view that must
+            be enumerated via SQLi.
+          </p>
+          <p class="summary-ar">
+            الحساب لا يملك صلاحيات تعديل، فقط قراءة، والفلاج داخل VIEW يجب
+            اكتشافها عبر استغلال SQLi بذكاء.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Normal URL, special DB perms</li>
+            <li><strong>Core Idea:</strong> Enumerate views/tables</li>
+          </ul>
+          <p class="hint">
+            Hint: This is about schema discovery rather than modification.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · Obfuscated SQL
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#41</span> Heavily obfuscated query
+          </h3>
+          <p class="summary">
+            Backend SQL is built through multiple concatenations and functions,
+            but still injectable via QR-derived input.
+          </p>
+          <p class="summary-ar">
+            الاستعلام معقّد ومشوّش (obfuscated)، لكن في النهاية يعتمد على
+            قيمة قادمة من QR بدون تعقيم.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Any format, complex backend</li>
+            <li><strong>Core Idea:</strong> Analyze messy SQL flow</li>
+          </ul>
+          <p class="hint">
+            Hint: Dynamic debugging / error messages become very important.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · Race condition
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#42</span> Race + SQLi combination
+          </h3>
+          <p class="summary">
+            QR leads to an endpoint that updates and reads from DB in one
+            request. Timing and SQLi can leak the flag.
+          </p>
+          <p class="summary-ar">
+            الطلب يقوم بعمليّة تحديث وقراءة بنفس الوقت، والتلاعب بالتوقيت مع
+            SQLi يسمح بقراءة الفلاج.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL to update+read action</li>
+            <li><strong>Core Idea:</strong> Race condition + injection</li>
+          </ul>
+          <p class="hint">
+            Hint: Try repeating crafted requests in parallel and compare results.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · Multi-tenant
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#43</span> Tenant escape via SQLi
+          </h3>
+          <p class="summary">
+            QR encodes a tenant ID. Backend tries to restrict data by tenant but
+            uses tenant ID unsafely in SQL.
+          </p>
+          <p class="summary-ar">
+            التطبيق متعدد المستأجرين (multi-tenant)، وID المستأجر من الـ QR
+            يُستخدم بطريقة غير آمنة تسمح بالخروج من حدود التينانت.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Tenant identifier</li>
+            <li><strong>Core Idea:</strong> Bypass tenant isolation</li>
+          </ul>
+          <p class="hint">
+            Hint: Show that access control built only in SQL WHERE is fragile.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · Stored procedure
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#44</span> QR parameter to stored procedure
+          </h3>
+          <p class="summary">
+            QR controls a parameter passed to a stored procedure that itself
+            concatenates SQL dynamically.
+          </p>
+          <p class="summary-ar">
+            المعاملة تمر عبر Stored Procedure، وهذه الـ procedure تبني SQL
+            ديناميكيًا من بارامتر قادم من الـ QR.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL to SP-based endpoint</li>
+            <li><strong>Core Idea:</strong> Injection inside procedures</li>
+          </ul>
+          <p class="hint">
+            Hint: Emphasize that even SPs can be vulnerable if written poorly.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · Log viewer
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#45</span> QR → log viewer with SQLi
+          </h3>
+          <p class="summary">
+            QR goes to an internal-style log viewer that filters by user ID
+            using an unsafe SQL query.
+          </p>
+          <p class="summary-ar">
+            صفحة لعرض الـ Logs تأخذ ID من الـ QR وتستخدمه مباشرة في استعلام
+            SQL لجلب السجلات.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL to log viewer</li>
+            <li><strong>Core Idea:</strong> Internal tools can be vulnerable</li>
+          </ul>
+          <p class="hint">
+            Hint: Great to show “admin tools are not automatically safe”.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · Analytics
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#46</span> Analytics dashboard injection
+          </h3>
+          <p class="summary">
+            QR gives access to an analytics page where date range / filter
+            inputs are injected into SQL.
+          </p>
+          <p class="summary-ar">
+            Dashboard إحصائي يعتمد على فلاتر وقت وحالات مختلفة، أحد هذه
+            الفلاتر يحقن داخل استعلام SQL بشكل غير آمن.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL to analytics</li>
+            <li><strong>Core Idea:</strong> Complex filter-based SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Try unexpected values for filters beyond usual dates.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · Config table
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#47</span> Flag in configuration table
+          </h3>
+          <p class="summary">
+            QR hints that the flag is not in users, but in a config table, only
+            discoverable via schema enumeration using SQLi.
+          </p>
+          <p class="summary-ar">
+            الفلاج مخزّن في جدول إعدادات (config)، ويحتاج اللاعب لاكتشاف
+            الجداول والأعمدة أولاً عن طريق SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL + textual hint</li>
+            <li><strong>Core Idea:</strong> Schema discovery + data exfil</li>
+          </ul>
+          <p class="hint">
+            Hint: Push players to use “information_schema” style techniques.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · Multi-step auth
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#48</span> QR + PIN + SQLi
+          </h3>
+          <p class="summary">
+            QR provides a PIN plus URL. Both are combined in SQL to validate a
+            user, with the PIN field injectable.
+          </p>
+          <p class="summary-ar">
+            الـ QR يعطي PIN ورابط، يتم التحقق منهما من خلال استعلام SQL يمكن
+            حقن الـ PIN فيه.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> URL + PIN value</li>
+            <li><strong>Core Idea:</strong> Bypass multi-factor check via SQLi</li>
+          </ul>
+          <p class="hint">
+            Hint: Show that adding “more fields” doesn’t fix bad SQL.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · Chained bugs
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#49</span> IDOR → SQLi via QR
+          </h3>
+          <p class="summary">
+            QR leaks an internal ID that first enables an IDOR, which then
+            exposes a page with SQLi.
+          </p>
+          <p class="summary-ar">
+            تسريب ID داخلي عبر QR يسمح أولاً بتجاوز صلاحيات (IDOR)، ثم الوصول
+            لنقطة فيها SQLi.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Internal endpoint ID</li>
+            <li><strong>Core Idea:</strong> Chain IDOR with injection</li>
+          </ul>
+          <p class="hint">
+            Hint: Designed to teach chaining multiple vulnerabilities.
+          </p>
+        </div>
+
+        <div class="challenge-card" data-level="expert">
+          <div class="badge-level">
+            <span class="badge-pill"></span> Expert · Final boss
+          </div>
+          <h3 class="challenge-title">
+            <span class="id">#50</span> Full-stack QR + SQLi scenario
+          </h3>
+          <p class="summary">
+            QR → encoding → stego → JS → API → SQLi. Multiple layers of
+            obfuscation, one real injection point at the end.
+          </p>
+          <p class="summary-ar">
+            سيناريو ضخم متعدد الطبقات: ترميز، صورة، JavaScript، API، ثم في
+            النهاية ثغرة SQLi وحيدة يجب اكتشافها.
+          </p>
+          <ul class="meta-list">
+            <li><strong>QR Content:</strong> Complex, multi-layer flow</li>
+            <li><strong>Core Idea:</strong> End-to-end exploitation path</li>
+          </ul>
+          <p class="hint">
+            Hint: Meant as a capstone challenge combining all previous concepts.
+          </p>
+        </div>
+      </div>
+
+      <div class="empty-state" id="emptyState">
+        No ideas matched your filters/search. <br />
+        <span>Try another level or keyword.</span>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const filterButtons = document.querySelectorAll(".filter-btn");
+    const searchInput = document.getElementById("search");
+    const cards = document.querySelectorAll(".challenge-card");
+    const emptyState = document.getElementById("emptyState");
+
+    let activeLevel = "all";
+
+    function applyFilters() {
+      const term = searchInput.value.toLowerCase().trim();
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const level = card.getAttribute("data-level");
+        const matchesLevel = activeLevel === "all" || level === activeLevel;
+        const text = card.textContent.toLowerCase();
+        const matchesSearch = term === "" || text.includes(term);
+
+        if (matchesLevel && matchesSearch) {
+          card.style.display = "";
+          visibleCount++;
+        } else {
+          card.style.display = "none";
+        }
+      });
+
+      emptyState.style.display = visibleCount === 0 ? "block" : "none";
+    }
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filterButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeLevel = btn.getAttribute("data-filter");
+        applyFilters();
+      });
+    });
+
+    searchInput.addEventListener("input", () => {
+      applyFilters();
+    });
+
+    applyFilters();
+  </script>
+</body>
+</html>
