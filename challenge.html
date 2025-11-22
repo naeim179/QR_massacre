@@ -12,6 +12,7 @@
       --text: #e5e7eb;
       --muted: #9ca3af;
       --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
       --radius-lg: 16px;
       --radius-full: 999px;
       --shadow: 0 0 40px rgba(15,23,42,0.9);
@@ -27,6 +28,7 @@
       color: var(--text);
     }
     .container { width: 100%; max-width: 900px; }
+
     header {
       margin-bottom: 20px;
       display: flex;
@@ -57,6 +59,7 @@
       font-size: .9rem;
       color: var(--muted);
     }
+    .subtitle strong { color: var(--accent); }
     .subtitle-ar {
       margin-top: 2px;
       font-size: .85rem;
@@ -83,6 +86,36 @@
       box-shadow: var(--shadow);
       padding: 16px 16px 18px;
       margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -140px;
+      background: conic-gradient(
+        from 220deg,
+        transparent 0,
+        rgba(56, 189, 248, 0.16) 12%,
+        transparent 32%,
+        transparent 60%,
+        rgba(56, 189, 248, 0.14) 72%,
+        transparent 90%
+      );
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
     }
     .badge {
       display: inline-flex;
@@ -94,7 +127,6 @@
       border: 1px solid rgba(148,163,184,0.5);
       background: rgba(15,23,42,0.9);
       color: var(--muted);
-      margin-bottom: 10px;
     }
     .badge-dot {
       width: 7px;
@@ -102,10 +134,59 @@
       border-radius: 999px;
       background: #22c55e;
     }
-    h2 { font-size: 1.1rem; margin-bottom: 8px; }
+    .badge-level-beginner .badge-dot { background:#22c55e; }
+    .badge-level-intermediate .badge-dot { background:#eab308; }
+    .badge-level-advanced .badge-dot { background:#fb923c; }
+    .badge-level-expert .badge-dot { background:#f97373; }
+
+    h2 {
+      font-size: 1.15rem;
+      margin-bottom: 6px;
+    }
+    .slug {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: .8rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .intro {
+      font-size: .9rem;
+      color: var(--text);
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+    .intro-ar {
+      font-size: .86rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+      direction: rtl;
+      text-align: right;
+      line-height: 1.5;
+    }
+
+    .steps {
+      margin-top: 4px;
+      font-size: .86rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .steps ol {
+      margin-left: 18px;
+      margin-top: 4px;
+    }
+    .steps li { margin-bottom: 3px; }
+    .steps-ar {
+      margin-top: 6px;
+      font-size: .84rem;
+      color: var(--muted);
+      direction: rtl;
+      text-align: right;
+      line-height: 1.6;
+    }
 
     .reveal-btn {
-      margin-top: 10px;
+      margin-top: 12px;
       border-radius: var(--radius-full);
       border: 1px solid rgba(148,163,184,0.7);
       padding: 9px 18px;
@@ -118,6 +199,7 @@
       align-items: center;
       gap: 8px;
     }
+    .reveal-btn span.icon { font-size: .95rem; }
     .reveal-btn:hover {
       border-color: var(--accent);
       box-shadow:
@@ -131,7 +213,7 @@
       border: 1px solid rgba(148,163,184,0.4);
       padding: 10px;
       background: radial-gradient(circle at top, #020617, #020617 60%, #000);
-      display: none; /* مخفي بالبداية */
+      display: none;
       flex-direction: column;
       align-items: center;
       gap: 8px;
@@ -149,7 +231,7 @@
         0 22px 45px rgba(8,47,73,0.95);
     }
     .qr-wrapper img {
-      max-width: 220px;
+      max-width: 240px;
       width: 100%;
       height: auto;
       background: white;
@@ -164,28 +246,36 @@
     .hint-tap {
       font-size: .78rem;
       color: var(--muted);
-      margin-top: 4px;
+      margin-top: 2px;
       text-align: center;
       font-style: italic;
     }
 
     .details {
       display: none;
-      margin-top: 10px;
-      font-size: .9rem;
+      margin-top: 12px;
+      font-size: .88rem;
       color: var(--text);
-      line-height: 1.5;
+      line-height: 1.6;
     }
     .details.visible {
       display: block;
     }
+    .details code {
+      background: rgba(15,23,42,0.8);
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: .82rem;
+    }
     .details-ar {
       direction: rtl;
       text-align: right;
-      font-size: .86rem;
+      font-size: .84rem;
       color: var(--muted);
       margin-top: 6px;
+      line-height: 1.6;
     }
+
     .start-btn {
       margin-top: 10px;
       border-radius: var(--radius-full);
@@ -199,11 +289,44 @@
     }
     .start-btn:hover { filter: brightness(1.07); }
 
-    .error {
-      margin-top: 40px;
-      text-align: center;
-      color: #f97373;
-      font-size: .95rem;
+    .note {
+      margin-top: 10px;
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    .error-card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      border: 1px solid #991b1b;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-top: 30px;
+    }
+    .error-title {
+      font-size: 1rem;
+      color: #fecaca;
+      margin-bottom: 6px;
+    }
+    .error-text {
+      font-size: .88rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .error-link {
+      font-size: .86rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+      body { padding-top: 20px; }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+      .subtitle-ar { font-size: .82rem; }
     }
   </style>
 </head>
@@ -216,10 +339,12 @@
           QR Massacre — Challenge
         </h1>
         <p class="subtitle">
-          Click to reveal the QR, scan it on your phone, then start exploiting the QR + SQLi idea.
+          Each card idea becomes a playable QR + SQLi challenge. Scan the QR on your phone,
+          then attack the URL like a real CTF (but on a safe lab).
         </p>
         <p class="subtitle-ar">
-          اضغط لعرض كود الـ QR، امسحه بالموبايل، وبعدها بلّش تطبّق فكرة <strong>QR + SQLi</strong> الخاصة بهذا التحدّي.
+          كل كارد من صفحة الأفكار يتحوّل لتحدّي حقيقي مبني على <strong>QR + SQLi</strong>.
+          امسح الكود بالموبايل، وابدأ الاستغلال على لاب آمن وضمن بيئة تدريب.
         </p>
       </div>
       <a href="index.html" class="back-link">← Back to ideas list</a>
@@ -231,73 +356,137 @@
   <script>
     function getIdFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      const id = parseInt(params.get("id"), 10);
+      const idStr = params.get("id");
+      const id = parseInt(idStr, 10);
       if (Number.isNaN(id) || id < 1 || id > 50) return null;
       return id;
+    }
+
+    function getLevel(id) {
+      if (id >= 1 && id <= 10) return { key: "beginner", label: "Beginner" };
+      if (id >= 11 && id <= 20) return { key: "intermediate", label: "Intermediate" };
+      if (id >= 21 && id <= 35) return { key: "advanced", label: "Advanced" };
+      return { key: "expert", label: "Expert" };
     }
 
     const id = getIdFromUrl();
     const mainEl = document.getElementById("main");
 
     if (!id) {
-      mainEl.innerHTML = '<p class="error">Invalid or missing challenge id. Use a QR from the main page.</p>';
+      mainEl.innerHTML = `
+        <section class="error-card">
+          <h2 class="error-title">Invalid or missing challenge ID</h2>
+          <p class="error-text">
+            This page expects a URL like <code>?id=7</code>.  
+            Use a QR from the main ideas page or open a card and click "Start challenge".
+          </p>
+          <a class="error-link" href="index.html">← Go back to the ideas library</a>
+        </section>
+      `;
     } else {
       const padded = String(id).padStart(2, "0");
+      const level = getLevel(id);
 
-      const html = `
+      mainEl.innerHTML = `
         <section class="card">
-          <div class="badge">
-            <span class="badge-dot"></span>
-            Challenge #${id}
-          </div>
-          <h2>QR + SQLi Idea #${id}</h2>
-
-          <button class="reveal-btn" id="revealBtn">
-            👁️ Click to view QR &nbsp;|&nbsp; اضغط لعرض الـ QR
-          </button>
-
-          <div class="qr-wrapper" id="qrBox">
-            <img src="qr/QR_${padded}.png" alt="QR code for challenge ${id}" />
-            <div class="qr-caption">
-              Scan this QR with your phone to open the entry URL for this challenge. <br/>
-              امسح هذا الكود بالموبايل عشان تفتح رابط التحدّي وتبلّش الهجوم.
+          <div class="card-inner">
+            <div class="badge-row">
+              <div class="badge badge-level-${level.key}">
+                <span class="badge-dot"></span>
+                ${level.label} · Challenge #${id}
+              </div>
+              <div class="badge">
+                <span class="badge-dot" style="background:#38bdf8;"></span>
+                QR + SQLi lab
+              </div>
             </div>
-            <div class="hint-tap">
-              بعد ما تمسح الكود، ارجع لهون واضغط على الكود لعرض وصف التحدّي 👇
-            </div>
-          </div>
 
-          <div class="details" id="details">
-            <p>
-              This challenge is based on idea <strong>#${id}</strong> from the main QR + SQLi ideas page.
-              Use the QR to get the starting URL, then look for a parameter you can inject into a SQL query
-              (e.g. <code>id</code>, <code>name</code>, <code>page</code>, <code>token</code>).
+            <h2>Challenge #${id} — QR + SQL Injection</h2>
+            <div class="slug">Linked to idea card #${id} from the main QR + SQLi ideas library.</div>
+
+            <p class="intro">
+              This challenge starts from a <strong>QR code</strong> and ends with a
+              <strong>SQL injection</strong> on a training endpoint. Use this page
+              only as the “launcher”: reveal the QR, scan it on your phone, then
+              attack the URL you get using typical SQLi techniques.
             </p>
-            <p class="details-ar">
-              هذا التحدّي مبني على الفكرة رقم <strong>#${id}</strong> من صفحة الأفكار الرئيسية.  
-              امسح الـ QR، افتح الرابط، ودوّر على أي بارامتر ممكن يكون قابل للحقن في استعلام SQL
-              (زي <code>id</code> أو <code>name</code> أو <code>page</code> أو <code>token</code>… إلخ).
+            <p class="intro-ar">
+              هذا التحدّي يبدأ من <strong>كود QR</strong> وينتهي بـ
+              <strong>SQL Injection</strong> على سكربت تدريبي.  
+              استخدم هذه الصفحة كنقطة الانطلاق فقط: اعرض الـ QR، امسحه بالموبايل،
+              ثم استهدف الرابط الناتج باستخدام تقنيات SQLi المناسبة للفكرة رقم <strong>${id}</strong>.
             </p>
-            <button class="start-btn">
-              Start the challenge
+
+            <div class="steps">
+              <strong>How to play (EN):</strong>
+              <ol>
+                <li>Click the button below to <strong>reveal the QR</strong> for this challenge.</li>
+                <li>Use your <strong>phone camera</strong> (or QR app) to scan the code.</li>
+                <li>Open the URL you get — this is the <strong>entry point</strong> of the lab.</li>
+                <li>Look for an input/parameter (e.g. <code>id</code>, <code>name</code>, <code>page</code>) that flows into SQL.</li>
+                <li>Abuse it with SQL injection techniques that match idea #${id} from the main page.</li>
+              </ol>
+            </div>
+            <div class="steps-ar">
+              <strong>طريقة اللعب (AR):</strong><br/>
+              ١) اضغط الزر لعرض <strong>كود الـ QR</strong> الخاص بهذا التحدّي.<br/>
+              ٢) امسح الكود باستخدام كاميرا الجوال أو تطبيق QR.<br/>
+              ٣) افتح الرابط الناتج — هذا هو <strong>نقطة الدخول</strong> للّاب.<br/>
+              ٤) دوّر على بارامتر (مثل <code>id</code> أو <code>name</code> أو <code>page</code>) يدخل في استعلام SQL.<br/>
+              ٥) استخدم حقن SQL المناسب لفكرة التحدّي رقم <strong>${id}</strong> كما هي موضّحة في كارد الفكرة في الصفحة الرئيسية.
+            </div>
+
+            <button class="reveal-btn" id="revealBtn">
+              <span class="icon">👁️</span>
+              Click to view QR &nbsp;|&nbsp; اضغط لعرض الـ QR
             </button>
+
+            <div class="qr-wrapper" id="qrBox">
+              <img src="qr/QR_${padded}.png" alt="QR code for challenge ${id}" />
+              <div class="qr-caption">
+                Scan this QR with your phone to open the <strong>real lab URL</strong> for challenge #${id}.<br/>
+                امسح هذا الكود بالموبايل لفتح <strong>رابط اللاب</strong> الخاص بالتحدّي رقم ${id}.
+              </div>
+              <div class="hint-tap">
+                After you scan and open the URL on your phone, tap this QR again here to show extra hints 👇  
+                بعد ما تفتح الرابط على جوّالك، اضغط على الكود هنا لعرض تلميحات إضافية.
+              </div>
+            </div>
+
+            <div class="details" id="details">
+              <p>
+                <strong>What now?</strong>  
+                Use the URL from the QR as if it were a CTF target. Try changing parameters,
+                breaking the SQL query, or extracting extra data (like a flag) depending on
+                the idea behind challenge #${id}.
+              </p>
+              <p class="details-ar">
+                <strong>ماذا بعد؟</strong><br/>
+                تعامل مع الرابط الناتج من الـ QR كأنه هدف CTF حقيقي. غيّر القيم في البارامترات،
+                حاول تكسر استعلام الـ SQL أو تستخرج بيانات إضافية (مثل الفلاج) بحسب
+                فكرة التحدّي رقم <strong>${id}</strong> في صفحة الأفكار.
+              </p>
+              <button class="start-btn" type="button">
+                I’ve scanned the QR — start hacking 💻
+              </button>
+              <p class="note">
+                ⚠ Training-only: these challenges are meant for <strong>education and CTF labs</strong>,
+                not for testing real systems without proper permission.
+              </p>
+            </div>
           </div>
         </section>
       `;
-
-      mainEl.innerHTML = html;
 
       const qrBox = document.getElementById("qrBox");
       const details = document.getElementById("details");
       const revealBtn = document.getElementById("revealBtn");
 
-      // أولاً: الزر يظهر الـ QR
       revealBtn.addEventListener("click", () => {
         qrBox.classList.add("visible");
         revealBtn.style.display = "none";
       });
 
-      // ثانياً: الضغط على صورة الـ QR يظهر وصف التحدّي
       qrBox.addEventListener("click", () => {
         details.classList.toggle("visible");
       });
