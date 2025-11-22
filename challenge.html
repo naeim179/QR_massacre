@@ -185,6 +185,19 @@
       line-height: 1.6;
     }
 
+    .sub-tag {
+      font-size: .78rem;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .sub-tag-ar {
+      font-size: .78rem;
+      color: var(--accent);
+      direction: rtl;
+      text-align: right;
+      margin-bottom: 4px;
+    }
+
     .reveal-btn {
       margin-top: 12px;
       border-radius: var(--radius-full);
@@ -339,12 +352,12 @@
           QR Massacre — Challenge
         </h1>
         <p class="subtitle">
-          Each card idea becomes a playable QR + SQLi challenge. Scan the QR on your phone,
-          then attack the URL like a real CTF (but on a safe lab).
+          Each idea card becomes a QR-powered SQL injection lab. Some challenges put the
+          <strong>payload itself inside the QR</strong>, not just a clean URL.
         </p>
         <p class="subtitle-ar">
-          كل كارد من صفحة الأفكار يتحوّل لتحدّي حقيقي مبني على <strong>QR + SQLi</strong>.
-          امسح الكود بالموبايل، وابدأ الاستغلال على لاب آمن وضمن بيئة تدريب.
+          كل كارد فكرة يتحوّل لتحدّي عملي مبني على <strong>QR + SQLi</strong>، وبعض
+          التحديات تكون فيها <strong>الثغرة نفسها مخزّنة داخل محتوى الـ QR</strong>، مش بس رابط عادي.
         </p>
       </div>
       <a href="index.html" class="back-link">← Back to ideas list</a>
@@ -354,6 +367,7 @@
   </div>
 
   <script>
+    // --- helper functions ---
     function getIdFromUrl() {
       const params = new URLSearchParams(window.location.search);
       const idStr = params.get("id");
@@ -369,6 +383,240 @@
       return { key: "expert", label: "Expert" };
     }
 
+    // --- per-challenge custom content (for 1–3 fully) ---
+    const challengeData = {
+      1: {
+        subEn: "QR holds the raw SQL payload used as username.",
+        subAr: "الـ QR يحتوي مباشرة على Payload حقن SQL يُستخدم كاسم مستخدم.",
+        introEn: `
+          This lab simulates a login kiosk that reads a QR code and automatically fills the
+          <strong>username</strong> field with the exact text from the QR. The backend blindly
+          inserts that value inside a SQL WHERE clause.
+        `,
+        introAr: `
+          هذا اللاب يحاكي نظام تسجيل دخول (kiosk) يقرأ كود <strong>QR</strong> ويضع محتواه
+          مباشرة في حقل <strong>اسم المستخدم</strong>. الباك-إند يثق بالمحتوى ويستخدمه كما هو
+          داخل جملة <strong>WHERE</strong> في استعلام SQL بدون أي تعقيم.
+        `,
+        stepsEn: [
+          "Reveal and scan the QR code below. Instead of a URL, you’ll see a raw SQL-looking string.",
+          "Imagine this string gets copied into the <code>username</code> field by the kiosk.",
+          "The backend runs: <code>SELECT * FROM users WHERE username = '$username' AND password = '$password'</code>.",
+          "With the payload from the QR, this WHERE clause becomes always true and bypasses login."
+        ],
+        stepsAr: [
+          "اعرض وامسح كود الـ QR. سترى نصًا يشبه حقن SQL وليس رابطًا عاديًا.",
+          "تخيّل أن هذا النص يُنسخ تلقائيًا إلى حقل <code>username</code> في نظام الدخول.",
+          "الباك-إند ينفّذ الاستعلام: <code>SELECT * FROM users WHERE username = '$username' AND password = '$password'</code>.",
+          "مع الـ Payload الموجود في الـ QR، شرط WHERE يصبح دائمًا صحيح، فيتم تجاوز تسجيل الدخول."
+        ],
+        detailsEn: `
+          <p>
+            <strong>Example backend (PHP, vulnerable):</strong>
+          </p>
+          <pre><code>
+$qr_content = $_POST['qr']; // read from QR scanner
+$username   = $qr_content;
+$password   = $_POST['password'];
+
+$sql = "SELECT * FROM users
+        WHERE username = '$username'
+          AND password = '$password'";
+          </code></pre>
+          <p>
+            If the QR content is <code>' OR 1=1 --</code>, the final query becomes:
+          </p>
+          <pre><code>
+SELECT * FROM users
+WHERE username = '' OR 1=1 -- '
+  AND password = 'anything';
+          </code></pre>
+          <p>
+            The <code>OR 1=1</code> makes the condition always true, and the comment
+            <code>--</code> ignores the rest, so the login is trivially bypassed.
+          </p>
+        `,
+        detailsAr: `
+          <p>
+            <strong>مثال باك-إند (PHP معرّض للثغرة):</strong>
+          </p>
+          <pre><code>
+$qr_content = $_POST['qr']; // قراءة النص من ماسح الـ QR
+$username   = $qr_content;
+$password   = $_POST['password'];
+
+$sql = "SELECT * FROM users
+        WHERE username = '$username'
+          AND password = '$password'";
+          </code></pre>
+          <p>
+            إذا كان محتوى الـ QR هو <code>' OR 1=1 --</code> فسيصبح الاستعلام:
+          </p>
+          <pre><code>
+SELECT * FROM users
+WHERE username = '' OR 1=1 -- '
+  AND password = 'anything';
+          </code></pre>
+          <p>
+            الشرط <code>OR 1=1</code> يجعله دائمًا صحيح، والتعليق <code>--</code> يلغي بقية الجملة،
+            وبذلك يتم تجاوز تسجيل الدخول بسهولة تامة.
+          </p>
+        `,
+        qrCaptionEn: `
+          This QR should contain a <strong>raw SQL payload</strong> such as
+          <code>' OR 1=1 --</code> instead of a URL. Treat it as if the kiosk
+          copies this string into the username field.
+        `,
+        qrCaptionAr: `
+          هذا الـ QR يجب أن يحتوي على <strong>Payload SQL خام</strong> مثل
+          <code>' OR 1=1 --</code> بدل رابط. تعامل معه كأن النظام ينسخه حرفيًا
+          داخل خانة اسم المستخدم.
+        `
+      },
+      2: {
+        subEn: "QR encodes a malicious URL with an injected id parameter.",
+        subAr: "الـ QR يحتوي رابطًا ملغّمًا فيه حقن داخل بارامتر id.",
+        introEn: `
+          This lab shows how a QR code can hold a <strong>weaponized URL</strong> where
+          the SQL injection payload is already inside the query string (e.g. in <code>id</code>).
+          The system opens whatever URL comes from the QR without validation.
+        `,
+        introAr: `
+          هذا اللاب يوضّح كيف يمكن أن يحتوي كود <strong>QR</strong> على رابط
+          <strong>ملغّم مسبقًا</strong> بحيث يكون حقن SQL موجودًا أصلًا داخل
+          بارامتر <code>id</code>، بينما النظام يفتح الرابط كما هو بدون أي تحقق أو فلترة.
+        `,
+        stepsEn: [
+          "Reveal and scan the QR below. This time, you will see a full URL, not just a payload.",
+          "Notice that the <code>id</code> parameter inside the URL already contains an injection like <code>7 OR 1=1--</code>.",
+          "A vulnerable backend does: <code>$id = $_GET['id']; $q = \"SELECT * FROM users WHERE id = $id\";</code>",
+          "Because the QR itself is malicious, scanning it is enough to trigger SQL injection."
+        ],
+        stepsAr: [
+          "اعرض وامسح كود الـ QR. هذه المرة سترى رابطًا كاملًا، وليس مجرد نص.",
+          "انتبه إلى أن بارامتر <code>id</code> في الرابط يحتوي من الأصل على حقن مثل <code>7 OR 1=1--</code>.",
+          "باك-إند معرّض للثغرة يعمل مثل: <code>$id = $_GET['id']; $q = \"SELECT * FROM users WHERE id = $id\";</code>.",
+          "بما أن الرابط نفسه ملغّم داخل الـ QR، مجرد مسحه وفتحه يكفي لتنفيذ SQLi."
+        ],
+        detailsEn: `
+          <p><strong>Example vulnerable backend:</strong></p>
+          <pre><code>
+$id = $_GET['id']; // from QR URL: ?id=7 OR 1=1--
+$sql = "SELECT * FROM users WHERE id = $id";
+          </code></pre>
+          <p>
+            If the QR encodes:
+          </p>
+          <pre><code>
+http://lab.local/profile.php?id=7 OR 1=1--
+          </code></pre>
+          <p>
+            the final SQL will be:
+          </p>
+          <pre><code>
+SELECT * FROM users WHERE id = 7 OR 1=1--;
+          </code></pre>
+          <p>
+            This returns all rows instead of a single profile.
+          </p>
+        `,
+        detailsAr: `
+          <p><strong>مثال باك-إند معرّض:</strong></p>
+          <pre><code>
+$id = $_GET['id']; // جاي من رابط داخل QR: ?id=7 OR 1=1--
+$sql = "SELECT * FROM users WHERE id = $id";
+          </code></pre>
+          <p>
+            إذا كان الـ QR يحتوي الرابط:
+          </p>
+          <pre><code>
+http://lab.local/profile.php?id=7 OR 1=1--
+          </code></pre>
+          <p>
+            يصبح الاستعلام النهائي:
+          </p>
+          <pre><code>
+SELECT * FROM users WHERE id = 7 OR 1=1--;
+          </code></pre>
+          <p>
+            فيرجع كل الصفوف بدل بروفايل واحد فقط، وهذا مثال واضح على SQLi عبر رابط ملغّم داخل QR.
+          </p>
+        `,
+        qrCaptionEn: `
+          This QR should contain a <strong>full URL</strong> such as
+          <code>http://lab.local/profile.php?id=7 OR 1=1--</code>.  
+          The injection lives inside the <code>id</code> parameter.
+        `,
+        qrCaptionAr: `
+          هذا الـ QR يجب أن يحتوي على <strong>رابط كامل</strong> مثل:
+          <code>http://lab.local/profile.php?id=7 OR 1=1--</code>.  
+          حقن SQL موجود داخل بارامتر <code>id</code> نفسه.
+        `
+      },
+      3: {
+        subEn: "QR stores a Base64-encoded SQL payload decoded by the backend.",
+        subAr: "الـ QR يخزّن Payload حقن SQL بصيغة Base64 ويتم فكّه في الباك-إند.",
+        introEn: `
+          Here the system thinks it is “safer” by taking a Base64 string from a QR code,
+          decoding it, and then using the result inside a SQL query. Encoding does not
+          equal security.
+        `,
+        introAr: `
+          في هذا اللاب يعتقد النظام أنه أصبح “أكثر أمانًا” لأنه يأخذ نصًا
+          بصيغة <strong>Base64</strong> من الـ QR، يفكّه، ثم يستخدم الناتج داخل استعلام SQL.
+          لكن الترميز <strong>لا يعني</strong> أمان.
+        `,
+        stepsEn: [
+          "Reveal and scan the QR code: you will see what looks like random Base64, not SQL.",
+          "Send that value as <code>code=...</code> to a vulnerable endpoint.",
+          "The backend does <code>$decoded = base64_decode($_GET['code']);</code> and then injects it into SQL.",
+          "The decoded value is actually a SQL injection payload such as <code>' OR 1=1 --</code>."
+        ],
+        stepsAr: [
+          "اعرض وامسح كود الـ QR؛ سترى نصًا مشفّرًا بـ Base64 يبدو عشوائيًا.",
+          "تخيّل أنك ترسله كقيمة في بارامتر <code>code=...</code> إلى سكربت معرّض.",
+          "الباك-إند ينفّذ: <code>$decoded = base64_decode($_GET['code']);</code> ثم يضع الناتج مباشرة داخل SQL.",
+          "القيمة بعد فك Base64 تكون فعليًا Payload مثل <code>' OR 1=1 --</code>."
+        ],
+        detailsEn: `
+          <p><strong>Example vulnerable backend:</strong></p>
+          <pre><code>
+$raw     = $_GET['code'];          // from QR: "JyBPUiAxPTEgLS0="
+$decoded = base64_decode($raw);    // "' OR 1=1 --"
+
+$sql = "SELECT * FROM users WHERE username = '$decoded'";
+          </code></pre>
+          <p>
+            If the QR holds <code>JyBPUiAxPTEgLS0=</code>, that decodes to:
+            <code>' OR 1=1 --</code>, which turns the query into a classic injection.
+          </p>
+        `,
+        detailsAr: `
+          <p><strong>مثال باك-إند معرّض:</strong></p>
+          <pre><code>
+$raw     = $_GET['code'];          // جاي من QR: "JyBPUiAxPTEgLS0="
+$decoded = base64_decode($raw);    // الناتج: ' OR 1=1 --
+
+$sql = "SELECT * FROM users WHERE username = '$decoded'";
+          </code></pre>
+          <p>
+            إذا كان الـ QR يحتوي النص <code>JyBPUiAxPTEgLS0=</code>، فإن فك Base64 ينتج:
+            <code>' OR 1=1 --</code>، فيتحوّل الاستعلام إلى حقن SQL كلاسيكي.
+          </p>
+        `,
+        qrCaptionEn: `
+          This QR should contain a <strong>Base64 string</strong> like
+          <code>JyBPUiAxPTEgLS0=</code>, which decodes to <code>' OR 1=1 --</code>.
+          The backend decodes it and gets injected.
+        `,
+        qrCaptionAr: `
+          هذا الـ QR يجب أن يحتوي على <strong>نص Base64</strong> مثل
+          <code>JyBPUiAxPTEgLS0=</code>، والذي يفك إلى <code>' OR 1=1 --</code>.
+          الباك-إند يفكّه ثم يتعرّض لحقن SQL.
+        `
+      }
+    };
+
     const id = getIdFromUrl();
     const mainEl = document.getElementById("main");
 
@@ -377,7 +625,7 @@
         <section class="error-card">
           <h2 class="error-title">Invalid or missing challenge ID</h2>
           <p class="error-text">
-            This page expects a URL like <code>?id=7</code>.  
+            This page expects a URL like <code>?id=7</code>.<br/>
             Use a QR from the main ideas page or open a card and click "Start challenge".
           </p>
           <a class="error-link" href="index.html">← Go back to the ideas library</a>
@@ -386,6 +634,68 @@
     } else {
       const padded = String(id).padStart(2, "0");
       const level = getLevel(id);
+      const data = challengeData[id];
+
+      // default / generic text for IDs without custom data
+      const genericIntroEn = `
+        This challenge starts from a <strong>QR code</strong> and ends with a
+        <strong>SQL injection</strong> on a training endpoint. Use this page as a launcher:
+        reveal the QR, scan it on your phone, then attack the URL or data you get using
+        SQLi techniques that match idea #${id} from the main library.
+      `;
+      const genericIntroAr = `
+        هذا التحدّي يبدأ من <strong>كود QR</strong> وينتهي بـ
+        <strong>SQL Injection</strong> على سكربت تدريبي. استخدم هذه الصفحة كنقطة
+        انطلاق: اعرض الـ QR، امسحه بالموبايل، ثم استهدف الرابط أو البيانات الناتجة
+        باستخدام تقنيات SQLi المناسبة للفكرة رقم <strong>${id}</strong> من المكتبة الرئيسية.
+      `;
+
+      const genericStepsEn = [
+        "Reveal the QR code for this challenge.",
+        "Scan it with your phone and open the resulting URL or data.",
+        "Identify which parameter / field flows into SQL on the backend.",
+        "Apply SQL injection techniques as suggested by the idea card."
+      ];
+      const genericStepsAr = [
+        "اعرض كود الـ QR الخاص بهذا التحدّي.",
+        "امسحه باستخدام جوّالك وافتح الرابط أو البيانات الناتجة.",
+        "حدّد أي بارامتر أو حقل يدخل في استعلام SQL في الباك-إند.",
+        "طبّق تقنيات SQLi كما هو موضّح في كارد الفكرة لهذا الرقم."
+      ];
+
+      const introEn = data ? data.introEn : genericIntroEn;
+      const introAr = data ? data.introAr : genericIntroAr;
+      const stepsEn = data ? data.stepsEn : genericStepsEn;
+      const stepsAr = data ? data.stepsAr : genericStepsAr;
+      const subEn = data ? data.subEn : "";
+      const subAr = data ? data.subAr : "";
+      const detailsEn = data ? data.detailsEn : `
+        <p>
+          Use this lab to practice reading data flow from <strong>QR → input → SQL query</strong>.
+          The exact vulnerability and exploitation style should match the description
+          on idea card #${id} in the main page (e.g. ID-based SQLi, search-based SQLi, blind SQLi, etc.).
+        </p>
+      `;
+      const detailsAr = data ? data.detailsAr : `
+        <p>
+          استخدم هذا اللاب للتدرّب على تتبّع تدفّق البيانات من
+          <strong>QR → إدخال المستخدم → استعلام SQL</strong>.
+          نوع الثغرة وطريقة الاستغلال يجب أن يتطابقا مع وصف الفكرة رقم <strong>${id}</strong>
+          في الصفحة الرئيسية (مثل SQLi على <code>id</code>، أو على خانة بحث، أو Blind SQLi، إلخ).
+        </p>
+      `;
+      const qrCaptionEn = data
+        ? data.qrCaptionEn
+        : `
+          Scan this QR with your phone to open the <strong>lab entry point</strong>
+          or obtain the raw data that flows into the backend SQL query.
+        `;
+      const qrCaptionAr = data
+        ? data.qrCaptionAr
+        : `
+          امسح هذا الكود بالموبايل للحصول على <strong>نقطة الدخول للّاب</strong>
+          أو البيانات الخام التي تُستخدم داخل استعلام SQL في الباك-إند.
+        `;
 
       mainEl.innerHTML = `
         <section class="card">
@@ -404,36 +714,25 @@
             <h2>Challenge #${id} — QR + SQL Injection</h2>
             <div class="slug">Linked to idea card #${id} from the main QR + SQLi ideas library.</div>
 
+            ${subEn ? `<div class="sub-tag">${subEn}</div>` : ""}
+            ${subAr ? `<div class="sub-tag-ar">${subAr}</div>` : ""}
+
             <p class="intro">
-              This challenge starts from a <strong>QR code</strong> and ends with a
-              <strong>SQL injection</strong> on a training endpoint. Use this page
-              only as the “launcher”: reveal the QR, scan it on your phone, then
-              attack the URL you get using typical SQLi techniques.
+              ${introEn}
             </p>
             <p class="intro-ar">
-              هذا التحدّي يبدأ من <strong>كود QR</strong> وينتهي بـ
-              <strong>SQL Injection</strong> على سكربت تدريبي.  
-              استخدم هذه الصفحة كنقطة الانطلاق فقط: اعرض الـ QR، امسحه بالموبايل،
-              ثم استهدف الرابط الناتج باستخدام تقنيات SQLi المناسبة للفكرة رقم <strong>${id}</strong>.
+              ${introAr}
             </p>
 
             <div class="steps">
               <strong>How to play (EN):</strong>
               <ol>
-                <li>Click the button below to <strong>reveal the QR</strong> for this challenge.</li>
-                <li>Use your <strong>phone camera</strong> (or QR app) to scan the code.</li>
-                <li>Open the URL you get — this is the <strong>entry point</strong> of the lab.</li>
-                <li>Look for an input/parameter (e.g. <code>id</code>, <code>name</code>, <code>page</code>) that flows into SQL.</li>
-                <li>Abuse it with SQL injection techniques that match idea #${id} from the main page.</li>
+                ${stepsEn.map(s => `<li>${s}</li>`).join("")}
               </ol>
             </div>
             <div class="steps-ar">
               <strong>طريقة اللعب (AR):</strong><br/>
-              ١) اضغط الزر لعرض <strong>كود الـ QR</strong> الخاص بهذا التحدّي.<br/>
-              ٢) امسح الكود باستخدام كاميرا الجوال أو تطبيق QR.<br/>
-              ٣) افتح الرابط الناتج — هذا هو <strong>نقطة الدخول</strong> للّاب.<br/>
-              ٤) دوّر على بارامتر (مثل <code>id</code> أو <code>name</code> أو <code>page</code>) يدخل في استعلام SQL.<br/>
-              ٥) استخدم حقن SQL المناسب لفكرة التحدّي رقم <strong>${id}</strong> كما هي موضّحة في كارد الفكرة في الصفحة الرئيسية.
+              ${stepsAr.map(s => `• ${s}`).join("<br/>")}
             </div>
 
             <button class="reveal-btn" id="revealBtn">
@@ -444,28 +743,22 @@
             <div class="qr-wrapper" id="qrBox">
               <img src="qr/QR_${padded}.png" alt="QR code for challenge ${id}" />
               <div class="qr-caption">
-                Scan this QR with your phone to open the <strong>real lab URL</strong> for challenge #${id}.<br/>
-                امسح هذا الكود بالموبايل لفتح <strong>رابط اللاب</strong> الخاص بالتحدّي رقم ${id}.
+                ${qrCaptionEn}<br/>
+                ${qrCaptionAr}
               </div>
               <div class="hint-tap">
-                After you scan and open the URL on your phone, tap this QR again here to show extra hints 👇  
-                بعد ما تفتح الرابط على جوّالك، اضغط على الكود هنا لعرض تلميحات إضافية.
+                After you scan and open the URL / data on your phone, tap this QR box again
+                here to show extra hints 👇  
+                بعد ما تفتح الرابط أو البيانات على جوّالك، اضغط على هذا المربّع مرة ثانية
+                لعرض تلميحات إضافية.
               </div>
             </div>
 
             <div class="details" id="details">
-              <p>
-                <strong>What now?</strong>  
-                Use the URL from the QR as if it were a CTF target. Try changing parameters,
-                breaking the SQL query, or extracting extra data (like a flag) depending on
-                the idea behind challenge #${id}.
-              </p>
-              <p class="details-ar">
-                <strong>ماذا بعد؟</strong><br/>
-                تعامل مع الرابط الناتج من الـ QR كأنه هدف CTF حقيقي. غيّر القيم في البارامترات،
-                حاول تكسر استعلام الـ SQL أو تستخرج بيانات إضافية (مثل الفلاج) بحسب
-                فكرة التحدّي رقم <strong>${id}</strong> في صفحة الأفكار.
-              </p>
+              ${detailsEn}
+              <div class="details-ar">
+                ${detailsAr}
+              </div>
               <button class="start-btn" type="button">
                 I’ve scanned the QR — start hacking 💻
               </button>
