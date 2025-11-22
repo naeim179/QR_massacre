@@ -33,6 +33,7 @@
       justify-content: space-between;
       gap: 12px;
       align-items: center;
+      flex-wrap: wrap;
     }
     .title-block h1 {
       font-size: 1.35rem;
@@ -71,6 +72,7 @@
       border: 1px solid rgba(148,163,184,0.4);
       padding: 6px 12px;
       background: rgba(15,23,42,.85);
+      white-space: nowrap;
     }
     .back-link:hover { border-color: var(--accent); }
 
@@ -102,17 +104,42 @@
     }
     h2 { font-size: 1.1rem; margin-bottom: 8px; }
 
+    .reveal-btn {
+      margin-top: 10px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(148,163,184,0.7);
+      padding: 9px 18px;
+      font-size: .9rem;
+      cursor: pointer;
+      background: linear-gradient(135deg, #020617, #020617);
+      color: var(--accent);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .reveal-btn:hover {
+      border-color: var(--accent);
+      box-shadow:
+        0 0 0 1px rgba(15,23,42,0.9),
+        0 18px 35px rgba(8,47,73,0.95);
+    }
+
     .qr-wrapper {
+      margin-top: 14px;
       border-radius: 14px;
       border: 1px solid rgba(148,163,184,0.4);
       padding: 10px;
       background: radial-gradient(circle at top, #020617, #020617 60%, #000);
-      display: flex;
+      display: none; /* مخفي بالبداية */
       flex-direction: column;
       align-items: center;
       gap: 8px;
       cursor: pointer;
       transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .qr-wrapper.visible {
+      display: flex;
     }
     .qr-wrapper:hover {
       transform: translateY(-3px);
@@ -148,6 +175,9 @@
       font-size: .9rem;
       color: var(--text);
       line-height: 1.5;
+    }
+    .details.visible {
+      display: block;
     }
     .details-ar {
       direction: rtl;
@@ -186,10 +216,10 @@
           QR Massacre — Challenge
         </h1>
         <p class="subtitle">
-          Scan the QR, read the brief, then exploit the QR + SQLi idea behind this ID.
+          Click to reveal the QR, scan it on your phone, then start exploiting the QR + SQLi idea.
         </p>
         <p class="subtitle-ar">
-          امسح كود الـ QR، اقرأ وصف التحدّي، وبعدين جرّب تطبّق فكرة <strong>QR + SQLi</strong> المرتبطة برقم هذا التحدّي.
+          اضغط لعرض كود الـ QR، امسحه بالموبايل، وبعدها بلّش تطبّق فكرة <strong>QR + SQLi</strong> الخاصة بهذا التحدّي.
         </p>
       </div>
       <a href="index.html" class="back-link">← Back to ideas list</a>
@@ -221,20 +251,27 @@
             Challenge #${id}
           </div>
           <h2>QR + SQLi Idea #${id}</h2>
+
+          <button class="reveal-btn" id="revealBtn">
+            👁️ Click to view QR &nbsp;|&nbsp; اضغط لعرض الـ QR
+          </button>
+
           <div class="qr-wrapper" id="qrBox">
             <img src="qr/QR_${padded}.png" alt="QR code for challenge ${id}" />
             <div class="qr-caption">
               Scan this QR with your phone to open the entry URL for this challenge. <br/>
-              <strong>Click the QR</strong> to reveal the mission details.
+              امسح هذا الكود بالموبايل عشان تفتح رابط التحدّي وتبلّش الهجوم.
             </div>
             <div class="hint-tap">
-              اضغط على صورة الـ QR عشان تشوف وصف التحدّي وكيف تبدأ 👇
+              بعد ما تمسح الكود، ارجع لهون واضغط على الكود لعرض وصف التحدّي 👇
             </div>
           </div>
+
           <div class="details" id="details">
             <p>
               This challenge is based on idea <strong>#${id}</strong> from the main QR + SQLi ideas page.
-              Use the QR to get the starting URL, then look for a parameter you can inject into a SQL query (e.g. <code>id</code>, <code>name</code>, <code>page</code>, <code>token</code>).
+              Use the QR to get the starting URL, then look for a parameter you can inject into a SQL query
+              (e.g. <code>id</code>, <code>name</code>, <code>page</code>, <code>token</code>).
             </p>
             <p class="details-ar">
               هذا التحدّي مبني على الفكرة رقم <strong>#${id}</strong> من صفحة الأفكار الرئيسية.  
@@ -252,8 +289,17 @@
 
       const qrBox = document.getElementById("qrBox");
       const details = document.getElementById("details");
+      const revealBtn = document.getElementById("revealBtn");
+
+      // أولاً: الزر يظهر الـ QR
+      revealBtn.addEventListener("click", () => {
+        qrBox.classList.add("visible");
+        revealBtn.style.display = "none";
+      });
+
+      // ثانياً: الضغط على صورة الـ QR يظهر وصف التحدّي
       qrBox.addEventListener("click", () => {
-        details.style.display = details.style.display === "block" ? "none" : "block";
+        details.classList.toggle("visible");
       });
     }
   </script>
