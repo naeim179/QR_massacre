@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>QR Massacre — Challenge 01 (Simulated SQLi)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      margin: 0;
+      padding: 24px 16px 40px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #0b1120 0, #020617 52%, #000 100%);
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 800px;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-bottom: 10px;
+    }
+    .subtitle-ar {
+      font-size: 0.86rem;
+      color: #9ca3af;
+      direction: rtl;
+      text-align: right;
+      margin-bottom: 14px;
+    }
+    .card {
+      background: #020617;
+      border-radius: 14px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 0 35px rgba(15, 23, 42, 0.85);
+      padding: 16px 16px 18px;
+      margin-bottom: 16px;
+    }
+    label {
+      font-size: 0.9rem;
+      display: block;
+      margin-bottom: 4px;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      max-width: 360px;
+      padding: 7px 9px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.88rem;
+      margin-bottom: 10px;
+      outline: none;
+    }
+    input:focus {
+      border-color: #38bdf8;
+      box-shadow:
+        0 0 0 1px rgba(56,189,248,0.2),
+        0 0 18px rgba(15,23,42,0.9);
+    }
+    button {
+      padding: 8px 18px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #0ea5e9, #22c55e);
+      color: #0b1120;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    button:hover {
+      filter: brightness(1.07);
+    }
+    .result {
+      margin-top: 12px;
+      font-size: 0.9rem;
+    }
+    .result.success {
+      color: #4ade80;
+    }
+    .result.fail {
+      color: #f97373;
+    }
+    pre {
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      overflow-x: auto;
+    }
+    code {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .hint {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 6px;
+    }
+    .hint strong { color: #38bdf8; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Challenge #01 — QR raw payload → simulated SQL login</h1>
+    <p class="subtitle">
+      The idea: the <strong>username</strong> field is auto-filled from a QR code.
+      The backend builds a SQL query using that value without sanitization.
+    </p>
+    <p class="subtitle-ar">
+      الفكرة: حقل <strong>اسم المستخدم</strong> يتم تعبئته تلقائيًا من كود QR،
+      والباك-إند (هنا نحاكيه بجافاسكربت) يبني استعلام SQL من هذه القيمة بدون أي تعقيم.
+    </p>
+
+    <div class="card">
+      <form id="loginForm" onsubmit="simulateLogin(event)">
+        <label>Username (auto-filled from QR if query param <code>u</code> is present)</label>
+        <input type="text" id="username" name="username" />
+
+        <label>Password (ignored for the injection, but here for realism)</label>
+        <input type="password" id="password" name="password" />
+
+        <button type="submit">Login (simulate)</button>
+
+        <p class="hint">
+          Tip: Try a QR that opens this page with
+          <code>?u=' OR 1=1 --</code> so the username is already an injection payload.
+        </p>
+      </form>
+
+      <div id="output" class="result"></div>
+
+      <h3 style="margin-top:14px;font-size:0.95rem;">Simulated vulnerable SQL:</h3>
+      <pre id="sqlBox"><code>SELECT * FROM users WHERE username = '...'
+  AND password = '...';</code></pre>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:6px;font-size:0.95rem;">How this lab works</h3>
+      <p style="font-size:0.88rem;">
+        We simulate a small user table in JavaScript:
+        one <code>admin</code> account and one <code>guest</code> account.
+        The “backend” builds a SQL string by concatenating the username and password
+        directly. If the injected payload makes the WHERE condition “always true”,
+        we treat it as a successful admin login and reveal a flag.
+      </p>
+      <p style="font-size:0.86rem;direction:rtl;text-align:right;margin-top:4px;">
+        هنا نحاكي جدول مستخدمين بسيط داخل جافاسكربت: مستخدم <code>admin</code> ومستخدم <code>guest</code>.
+        “الباك-إند” يبني جملة SQL عن طريق دمج اسم المستخدم وكلمة المرور مباشرة.
+        إذا جعل الـ Payload القادم من الـ QR شرط WHERE دائمًا صحيح، نعتبر أن تسجيل الدخول كـ admin نجح
+        ونكشف فلاج تدريبي.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Fake "database"
+    const users = [
+      { username: "admin", password: "supersecret", isAdmin: true },
+      { username: "guest", password: "guest123", isAdmin: false },
+    ];
+
+    // Autofill from URL param ?u=...
+    (function autoFillFromQR() {
+      const params = new URLSearchParams(window.location.search);
+      const u = params.get("u");
+      if (u) {
+        document.getElementById("username").value = u;
+      }
+      const p = params.get("p");
+      if (p) {
+        document.getElementById("password").value = p;
+      }
+    })();
+
+    function simulateLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      // vulnerable string concatenation (simulation only)
+      const sql =
+        "SELECT * FROM users WHERE username = '" +
+        username +
+        "' AND password = '" +
+        password +
+        "';";
+
+      document.getElementById("sqlBox").textContent = sql;
+
+      const output = document.getElementById("output");
+
+      // Naive simulation:
+      // - if username is exactly admin & password correct => admin login
+      // - OR if username contains a classic injection pattern => treat as bypass
+      const lower = username.toLowerCase();
+
+      let isInjected =
+        lower.includes("' or 1=1 --") ||
+        lower.includes("' or 1=1#") ||
+        lower.includes("' or '1'='1");
+
+      if (isInjected) {
+        output.className = "result success";
+        output.innerHTML =
+          "Injected successfully! Logged in as <strong>admin</strong> via SQLi.<br>" +
+          "Training flag: <code>CTF{qr_raw_payload_sqli}</code>";
+        return;
+      }
+
+      // normal check: see if any user matches exactly
+      const user = users.find(
+        (u) => u.username === username && u.password === password
+      );
+
+      if (!user) {
+        output.className = "result fail";
+        output.textContent = "Login failed (no matching user).";
+      } else if (user.isAdmin) {
+        output.className = "result success";
+        output.innerHTML =
+          "Normal admin login (no injection).<br>" +
+          "Training flag (boring way): <code>CTF{admin_with_real_password}</code>";
+      } else {
+        output.className = "result success";
+        output.textContent = "Logged in as guest (no flag). Try to inject instead.";
+      }
+    }
+  </script>
+</body>
+</html>
