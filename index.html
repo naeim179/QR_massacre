@@ -228,12 +228,15 @@
       background: radial-gradient(circle at top, #020617, #020617 52%, #020617);
       border-radius: var(--radius-lg);
       border: 1px solid rgba(31, 41, 55, 0.95);
-      padding: 14px 14px 13px;
+      padding: 14px 14px 13px 14px;
       box-shadow: var(--shadow-card);
       position: relative;
       overflow: hidden;
       transition: transform 0.18s ease, box-shadow 0.18s ease,
         border-color 0.18s ease, background 0.18s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .challenge-card::before {
@@ -282,7 +285,7 @@
       background: rgba(15, 23, 42, 0.85);
       border: 1px solid rgba(148, 163, 184, 0.5);
       color: var(--text-muted);
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       position: relative;
       z-index: 1;
     }
@@ -312,7 +315,7 @@
 
     .challenge-title {
       font-size: 0.98rem;
-      margin-bottom: 6px;
+      margin-bottom: 3px;
       position: relative;
       z-index: 1;
     }
@@ -328,7 +331,7 @@
     .summary {
       font-size: 0.86rem;
       color: var(--text-muted);
-      margin-bottom: 7px;
+      margin-bottom: 4px;
       line-height: 1.45;
       position: relative;
       z-index: 1;
@@ -337,7 +340,7 @@
     .summary-ar {
       font-size: 0.8rem;
       color: var(--text-muted);
-      margin-bottom: 7px;
+      margin-bottom: 4px;
       direction: rtl;
       text-align: right;
       position: relative;
@@ -361,7 +364,7 @@
     }
 
     .hint {
-      margin-top: 5px;
+      margin-top: 4px;
       font-size: 0.76rem;
       color: rgba(148, 163, 184, 0.9);
       font-style: italic;
@@ -371,6 +374,44 @@
 
     .hint span {
       color: var(--accent);
+    }
+
+    /* footer داخل الكارد لزر Start challenge */
+    .card-footer {
+      margin-top: 6px;
+      display: flex;
+      justify-content: flex-end;
+      position: relative;
+      z-index: 1;
+    }
+
+    .start-link {
+      border-radius: var(--radius-full);
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      border: 1px solid rgba(56, 189, 248, 0.7);
+      background: radial-gradient(circle at top left, #020617, #020617 55%, #000);
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .start-link::before {
+      content: "▶";
+      font-size: 0.7rem;
+    }
+
+    .start-link:hover {
+      box-shadow:
+        0 0 0 1px rgba(15, 23, 42, 0.9),
+        0 18px 35px rgba(8, 47, 73, 0.95);
+      border-color: var(--accent);
+      color: #e0f2fe;
     }
 
     .empty-state {
@@ -421,7 +462,7 @@
           </h1>
           <p class="subtitle">
             50 <strong>educational</strong> QR-based SQL Injection challenge ideas,
-            organized by difficulty. Designed for <strong>CTF & training only</strong> —
+            organized by difficulty. Designed for <strong>CTF & training only</strong> — 
             never for attacking real systems.
           </p>
           <p class="subtitle-ar">
@@ -471,6 +512,7 @@
 
     <main>
       <div class="grid" id="challengeGrid">
+        <!-- الكروت نفسها بالضبط بدون تعديل -->
         <!-- ========== BEGINNER (1–10) ========== -->
         <div class="challenge-card" data-level="beginner">
           <div class="badge-level">
@@ -1731,21 +1773,39 @@
     });
 
     applyFilters();
+
+    // ====== إضافة زر Start challenge لكل كارد أوتوماتيك ======
+    cards.forEach((card) => {
+      const idSpan = card.querySelector(".challenge-title .id");
+      if (!idSpan) return;
+      const raw = idSpan.textContent.trim(); // "#01"
+      const numStr = raw.replace("#", "");
+      const num = parseInt(numStr, 10);
+      if (Number.isNaN(num)) return;
+
+      const footer = document.createElement("div");
+      footer.className = "card-footer";
+
+      const link = document.createElement("a");
+      link.className = "start-link";
+      link.href = "challenge.html?id=" + num;
+      link.textContent = "Start challenge";
+
+      footer.appendChild(link);
+      card.appendChild(footer);
+    });
   </script>
 
-
-<script>
-  (function () {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
-    if (id) {
-      // redirect to challenge page
-      window.location.href = "challenge.html?id=" + encodeURIComponent(id);
-    }
-  })();
-</script>
-
-
+  <!-- redirect من ?id= إلى صفحة التحدي -->
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      if (id) {
+        window.location.href = "challenge.html?id=" + encodeURIComponent(id);
+      }
+    })();
+  </script>
 
 </body>
 </html>
